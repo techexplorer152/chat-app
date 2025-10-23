@@ -1,0 +1,19 @@
+.Sidebar{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #0bc1c1;
+    color: darkblue;
+}
+
+.Chat_Area{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: orange;
+    color: red;
+}
+.Container{
+    display: flex;
+    flex-direction: row;
+}

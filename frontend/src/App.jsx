@@ -3,13 +3,14 @@ import reactLogo from './assets/react.svg'
 import viteLogo from '/vite.svg'
 import './App.css'
 import React from 'react';
+import ChatPage from "./pages/ChatPage.jsx";
 
 
 function App() {
-  const [count, setCount] = useState(0)
+
 
   return (
-    <div>HI</div>
+    <ChatPage/>
   )
 }
 

@@ -1,0 +1,13 @@
+.Header {
+    width: 100%;
+    min-height: 120px;
+    background-color: yellow;
+    color: #0e18d5;
+    align-items: center;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+
+
+}
+

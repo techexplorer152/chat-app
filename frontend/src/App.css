@@ -2,3 +2,9 @@ div{
   color: #09f4de;
   font-size: 90px;
 }
+html, body {
+  overflow-x: hidden; /* prevent sideways scroll */
+  width: 100%;
+  margin: 0;
+  padding: 0;
+}
