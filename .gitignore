@@ -27,3 +27,5 @@ dist-ssr
 #My files
 
 .env
+
+/generated/prisma
