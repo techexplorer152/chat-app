@@ -4,13 +4,19 @@ import viteLogo from '/vite.svg'
 import './App.css'
 import React from 'react';
 import ChatPage from "./pages/ChatPage.jsx";
+import Login from './pages/Login.jsx';
 
 
 function App() {
 
 
   return (
-    <ChatPage/>
+
+      <div>
+
+        <Login/>
+      </div>
+
   )
 }
 

@@ -1,0 +1,72 @@
+html, body, #root {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+}
+
+.login {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.Welcome-Back{
+    font-size: 50px;
+    color: white;
+}
+
+.container-Login {
+    display: flex;
+    flex-direction: column;
+    width:350px;
+    height:420px;
+
+    gap: 20px;
+
+    backdrop-filter: blur(15px);
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 20px;
+    padding: 40px 30px;
+
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+    text-align: center;
+    color: #fff;
+}
+
+.container-Login input{
+
+    padding: 12px 40px 12px 15px;
+    border-radius: 10px;
+    border: none;
+    outline: none;
+    background: rgba(255, 255, 255, 0.15);
+    color: #fff;
+    font-size: 1rem;
+    transition: background 0.3s ease;
+
+}
+.container-Login input::placeholder {
+    color: rgba(255, 255, 255, 0.6);
+}
+.container-Login button{
+    align-self: center;
+
+    width: 200px;
+
+    padding: 12px;
+    background: linear-gradient(90deg, #4facfe, #00f2fe);
+    border: none;
+    border-radius: 10px;
+    color: white;
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.container-Login button:hover{
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(118, 75, 162, 0.4);
+}
