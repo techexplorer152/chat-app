@@ -18,7 +18,7 @@ export async function register(req, res) {
 
         const newUser = await createUser({email,password,username});
 
-        //         //this is to respond if the process was a success
+        //         this is to respond if the process was a success
 
         const {password: _, ...userData } = newUser;
         return res.status(201).json({
