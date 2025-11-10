@@ -1,12 +1,12 @@
 import { useState } from 'react';
 import axios from 'axios';
-import React  from "react";
+import React from "react";
 import './Login.css';
+import { Link } from 'react-router-dom';
 
 function Login({ setToken }) {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const [message, setMessage] = useState('');
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -18,9 +18,9 @@ function Login({ setToken }) {
 
             localStorage.setItem('authToken', res.data.token);
             setToken && setToken(res.data.token);
-            setMessage('Login successful!');
+            console.log('Login successful');
         } catch (err) {
-            setMessage(err.response?.data?.message || 'Login failed');
+            console.error('Login error:', err);
         }
     };
 
@@ -48,11 +48,14 @@ function Login({ setToken }) {
                     Enter
                 </button>
 
-                {message && <p style={{ color: 'red', marginTop: '10px' }}>{message}</p>}
+                <h3 className="go-to-register">
+                    Don't have an account? <Link to="/register">Register</Link>
+                </h3>
             </div>
         </div>
     );
 }
 
 export default Login;
+
 
