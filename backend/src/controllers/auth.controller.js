@@ -3,10 +3,8 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 
 export async function register(req, res) {
-
-
-    try{
-        const { email, password ,username} = req.body;
+    try {
+        const { email, password, username } = req.body;
 
         if (!username || !email || !password) {
             return res.status(400).json({ message: "All fields are required." });
@@ -14,31 +12,29 @@ export async function register(req, res) {
 
         const existingUser = await findUserByEmail(email);
         if (existingUser) {
-            return res.status(400).json({message: "User already exists"});
+            return res.status(400).json({ message: "User already exists" });
         }
 
+        // ✅ Hash the password here (just to be explicit)
+        const hashedPassword = await bcrypt.hash(password, 10);
 
-        const newUser = await createUser({email,password,username});
+        const newUser = await createUser({
+            email,
+            username,
+            password: hashedPassword,
+        });
 
-        //         this is to respond if the process was a success
+        const { password: _, ...userData } = newUser;
 
-        const {password: _, ...userData } = newUser;
         return res.status(201).json({
             message: "User registered successfully.",
             user: userData,
         });
-    }
-
-
-
-
-    catch(err){
+    } catch (err) {
         console.error("Register error:", err);
         res.status(500).json({ message: "Server error." });
     }
-
 }
-
 
 export async function login(req, res) {
     try {
@@ -48,18 +44,15 @@ export async function login(req, res) {
             return res.status(400).json({ message: "All fields are required." });
         }
 
-
         const existingUser = await findUserByEmail(email);
         if (!existingUser) {
             return res.status(400).json({ message: "User does not exist." });
         }
 
-
         const validPassword = await bcrypt.compare(password, existingUser.password);
         if (!validPassword) {
             return res.status(400).json({ message: "Invalid credentials." });
         }
-
 
         const token = jwt.sign(
             { id: existingUser.id, email: existingUser.email },
@@ -67,10 +60,11 @@ export async function login(req, res) {
             { expiresIn: process.env.JWT_EXPIRATION || "1h" }
         );
 
-
         const { password: _, ...userData } = existingUser;
-        return res.status(200).json({ message: "Login successful.", token, user: userData });
 
+        return res
+            .status(200)
+            .json({ message: "Login successful.", token, user: userData });
     } catch (err) {
         console.error("Login error:", err);
         res.status(500).json({ message: "Server error." });
