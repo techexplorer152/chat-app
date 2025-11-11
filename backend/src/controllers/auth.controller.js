@@ -11,11 +11,11 @@ export async function register(req, res) {
         }
 
         const existingUser = await findUserByEmail(email);
+
         if (existingUser) {
             return res.status(400).json({ message: "User already exists" });
         }
 
-        // ✅ Hash the password here (just to be explicit)
         const hashedPassword = await bcrypt.hash(password, 10);
 
         const newUser = await createUser({
@@ -31,7 +31,6 @@ export async function register(req, res) {
             user: userData,
         });
     } catch (err) {
-        console.error("Register error:", err);
         res.status(500).json({ message: "Server error." });
     }
 }
@@ -45,11 +44,13 @@ export async function login(req, res) {
         }
 
         const existingUser = await findUserByEmail(email);
+
         if (!existingUser) {
             return res.status(400).json({ message: "User does not exist." });
         }
 
         const validPassword = await bcrypt.compare(password, existingUser.password);
+
         if (!validPassword) {
             return res.status(400).json({ message: "Invalid credentials." });
         }
@@ -62,11 +63,8 @@ export async function login(req, res) {
 
         const { password: _, ...userData } = existingUser;
 
-        return res
-            .status(200)
-            .json({ message: "Login successful.", token, user: userData });
+        return res.status(200).json({ message: "Login successful.", token, user: userData });
     } catch (err) {
-        console.error("Login error:", err);
         res.status(500).json({ message: "Server error." });
     }
 }
