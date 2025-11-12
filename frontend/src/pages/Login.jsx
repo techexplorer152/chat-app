@@ -3,10 +3,13 @@ import axios from 'axios';
 import React from "react";
 import './Login.css';
 import { Link } from 'react-router-dom';
+import { useNavigate } from "react-router-dom";
 
 function Login({ setToken }) {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const navigate = useNavigate();
+
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -19,6 +22,7 @@ function Login({ setToken }) {
 
             localStorage.setItem('authToken', res.data.token);
             setToken && setToken(res.data.token);
+            navigate("/chat");
             console.log('Login successful');
         } catch (err) {
             console.error('Login error:', err);
