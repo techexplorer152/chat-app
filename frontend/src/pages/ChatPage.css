@@ -7,6 +7,8 @@
 }
 
 .chat-container {
+    font-size: 20px;
+    color: #042147;
     display: flex;
     height: 100vh;
     background-color: #f5f7fa;
@@ -29,6 +31,7 @@
 }
 
 .chat-list {
+    color: #0ec19e;
     flex: 1;
     overflow-y: auto;
 }
