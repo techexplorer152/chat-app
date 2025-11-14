@@ -1,13 +1,14 @@
 import { useState } from "react";
 import axios from "axios";
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import "./Register.css";
 
 function Register({ setToken }) {
     const [username, setUsername] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const navigate = useNavigate();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -18,7 +19,9 @@ function Register({ setToken }) {
                 password,
             });
 
-            console.log("User registered:", res.data.user);
+            localStorage.setItem("authToken", res.data.user.token || "");
+            setToken && setToken(res.data.user.token);
+            navigate("/chat");
         } catch (err) {
             console.error("Registration error:", err);
         }
@@ -64,4 +67,3 @@ function Register({ setToken }) {
 }
 
 export default Register;
-

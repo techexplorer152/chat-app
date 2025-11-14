@@ -1,17 +1,52 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import { io } from "socket.io-client";
 import "./ChatPage.css";
 
+const SOCKET_URL = import.meta.env.VITE_SOCKET_URL;
+const socket = io(SOCKET_URL);
+
 function ChatPage() {
-    const [messages, setMessages] = useState([
-        { text: "Hello! Welcome to the chat app.", sent: false },
-        { text: "Thanks! Excited to be here 😄", sent: true },
-        { text: "You can send emojis, files, or even video calls.", sent: false },
-    ]);
+    const [messages, setMessages] = useState([]);
     const [input, setInput] = useState("");
 
+    const user = JSON.parse(localStorage.getItem("user"));
+
+    useEffect(() => {
+        const fetchMessages = async () => {
+            if (!user) return;
+
+            const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/messages`);
+            const data = await res.json();
+
+            setMessages(
+                data.map(m => ({
+                    text: m.text,
+                    senderId: m.sender_id,
+                    sent: m.sender_id === user.id
+                }))
+            );
+        };
+
+        fetchMessages();
+
+        socket.on("receive_message", (msg) => {
+            setMessages(prev => [
+                ...prev,
+                { ...msg, sent: msg.senderId === user.id }
+            ]);
+        });
+
+        return () => socket.off("receive_message");
+    }, [user]);
+
     const handleSend = () => {
-        if (!input.trim()) return;
-        setMessages([...messages, { text: input, sent: true }]);
+        if (!input.trim() || !user) return;
+
+        socket.emit("send_message", {
+            text: input,
+            senderId: user.id
+        });
+
         setInput("");
     };
 
@@ -22,7 +57,7 @@ function ChatPage() {
                 <div className="chat-list">
                     {["Group Chat 1", "Group Chat 2", "John Doe", "Jane Smith"].map((name, i) => (
                         <div key={i} className="chat-item">
-                            <img src="https://via.placeholder.com/40" alt="user" />
+                            <img src="https://dummyimage.com/40x40/000/fff" alt="user" />
                             <span>{name}</span>
                         </div>
                     ))}
@@ -64,3 +99,5 @@ function ChatPage() {
 }
 
 export default ChatPage;
+
+

@@ -25,7 +25,8 @@ dist-ssr
 
 
 #My files
-
+frontend/.env
+backend/.env
 .env
 notes
 
