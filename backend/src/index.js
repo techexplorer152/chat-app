@@ -29,29 +29,30 @@ const io = new Server(server, {
     },
 });
 
-io.on('connection', (socket) => {
-    console.log("New client connected:", socket.id);
+io.on("connection", (socket) => {
+    console.log("User connected", socket.id);
 
-    socket.on("send_message", async ({ text, senderId }) => {
-        if (!text || !senderId) return;
 
-        const savedMessage = await prisma.messages.create({
-            data: {
-                text,
-                sender_id: senderId,
-            },
-        });
-
-        io.emit("receive_message", {
-            id: savedMessage.id,
-            text: savedMessage.text,
-            senderId: savedMessage.sender_id,
-            createdAt: savedMessage.created_at
-        });
+    socket.on("join", (userId) => {
+        socket.join(userId);
+        console.log(`User ${userId} joined room ${userId}`);
     });
 
-    socket.on("disconnect", () => {
-        console.log("Client disconnected:", socket.id);
+    socket.on("send_message", async (data) => {
+        const { text, senderId, receiverId } = data;
+
+
+        const message = await Message.create({
+            text,
+            senderId,
+            receiverId,
+        });
+
+
+        io.to(receiverId).emit("receive_message", message);
+
+
+        io.to(senderId).emit("receive_message", message);
     });
 });
 
