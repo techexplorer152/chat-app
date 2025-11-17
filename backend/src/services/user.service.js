@@ -6,7 +6,7 @@ export async function createUser({ email, password, username }) {
         data: {
             username,
             email,
-            password, // already hashed by controller
+            password,
         },
     });
 
@@ -16,5 +16,12 @@ export async function createUser({ email, password, username }) {
 export async function findUserByEmail(email) {
     return await prisma.user.findUnique({
         where: { email },
+    });
+}
+
+
+export async function getAllUsers() {
+    return await prisma.user.findMany({
+        select: { id: true, username: true }
     });
 }
