@@ -32,8 +32,48 @@ const io = new Server(server, {
     },
 });
 
+<<<<<<< HEAD
 
 setupChatSockets(io);
+=======
+io.on("connection", (socket) => {
+    console.log("User connected", socket.id);
+
+
+    socket.on("join", (userId) => {
+        socket.join(userId);
+        console.log(`User ${userId} joined room ${userId}`);
+    });
+
+    socket.on("send_message", async (data) => {
+        const { text, senderId, receiverId } = data;
+
+
+        const message = await Message.create({
+            text,
+            senderId,
+            receiverId,
+        });
+
+
+        io.to(receiverId).emit("receive_message", message);
+
+
+        io.to(senderId).emit("receive_message", message);
+    });
+});
+
+app.get('/', (req, res) => {
+    res.send('This is a Test');
+});
+
+app.get("/api/messages", async (req, res) => {
+    const allMessages = await prisma.messages.findMany({
+        orderBy: { id: "asc" }
+    });
+    res.json(allMessages);
+});
+>>>>>>> 91e5905870a3cac11061e5e020df641600cd53ab
 
 
 server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
