@@ -7,7 +7,7 @@ import { useNavigate } from "react-router-dom";
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
-function Login({ setToken }) {
+function Login() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const navigate = useNavigate();
@@ -16,17 +16,16 @@ function Login({ setToken }) {
         e.preventDefault();
 
         try {
-            const res = await axios.post(`${BACKEND_URL}/api/auth/login`, {
-                email,
-                password,
-            });
+            const res = await axios.post(
+                `${BACKEND_URL}/api/auth/login`,
+                { email, password },
+                { withCredentials: true }
+            );
 
-            const { token, user } = res.data;
 
-            localStorage.setItem('authToken', token);
-            localStorage.setItem('user', JSON.stringify(user));
+            const { user } = res.data;
 
-            setToken && setToken(token);
+
             navigate("/chat");
         } catch (err) {
             console.error('Login error:', err);
@@ -61,3 +60,4 @@ function Login({ setToken }) {
 }
 
 export default Login;
+

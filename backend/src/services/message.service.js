@@ -1,13 +1,16 @@
 import prisma from '../db/connect.js';
 
-export async function saveMessage({ text, senderId }) {
+
+
+export async function saveGroupMessage({ text, sender_id }) {
     return await prisma.messages.create({
-        data: { text, sender_id: senderId },
+        data: { text, sender_id },
     });
 }
 
-export async function getMessages() {
+
+export async function getAllGroupMessages() {
     return await prisma.messages.findMany({
-        orderBy: { created_at: 'asc' }
+        orderBy: { created_at: 'asc' },
     });
 }

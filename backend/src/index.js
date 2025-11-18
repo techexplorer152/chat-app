@@ -13,15 +13,17 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 const FRONTEND_URL = process.env.VITE_FRONTEND_URL;
 
-
 app.use(cors({ origin: FRONTEND_URL, credentials: true }));
 app.use(express.json());
-
 
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/messages', messageRoutes);
 
+
+app.get('/', (req, res) => {
+    res.send('This is a Test');
+});
 
 const server = http.createServer(app);
 const io = new Server(server, {
@@ -32,48 +34,6 @@ const io = new Server(server, {
     },
 });
 
-<<<<<<< HEAD
-
 setupChatSockets(io);
-=======
-io.on("connection", (socket) => {
-    console.log("User connected", socket.id);
-
-
-    socket.on("join", (userId) => {
-        socket.join(userId);
-        console.log(`User ${userId} joined room ${userId}`);
-    });
-
-    socket.on("send_message", async (data) => {
-        const { text, senderId, receiverId } = data;
-
-
-        const message = await Message.create({
-            text,
-            senderId,
-            receiverId,
-        });
-
-
-        io.to(receiverId).emit("receive_message", message);
-
-
-        io.to(senderId).emit("receive_message", message);
-    });
-});
-
-app.get('/', (req, res) => {
-    res.send('This is a Test');
-});
-
-app.get("/api/messages", async (req, res) => {
-    const allMessages = await prisma.messages.findMany({
-        orderBy: { id: "asc" }
-    });
-    res.json(allMessages);
-});
->>>>>>> 91e5905870a3cac11061e5e020df641600cd53ab
-
 
 server.listen(PORT, () => console.log(`Server running on port ${PORT}`));

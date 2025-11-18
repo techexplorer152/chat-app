@@ -4,7 +4,9 @@ import React from "react";
 import { Link, useNavigate } from "react-router-dom";
 import "./Register.css";
 
-function Register({ setToken }) {
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
+
+function Register() {
     const [username, setUsername] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
@@ -13,14 +15,16 @@ function Register({ setToken }) {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            const res = await axios.post("http://localhost:5000/api/auth/register", {
-                username,
-                email,
-                password,
-            });
+            const res = await axios.post(
+                `${BACKEND_URL}/api/auth/register`,
+                { username, email, password },
+                { withCredentials: true }
+            );
 
-            localStorage.setItem("authToken", res.data.user.token || "");
-            setToken && setToken(res.data.user.token);
+
+            const { user } = res.data;
+
+
             navigate("/chat");
         } catch (err) {
             console.error("Registration error:", err);
