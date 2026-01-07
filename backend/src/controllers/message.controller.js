@@ -13,13 +13,22 @@ export async function getAllMessages(req, res) {
 export async function createMessage(req, res) {
     try {
         const { text, sender_id } = req.body;
-        if (!text || !sender_id) {
-            return res.status(400).json({ error: 'Missing text or sender_id' });
+        const imageUrl = req.file ? `/uploads/${req.file.filename}` : null;
+
+        if (!text && !imageUrl) {
+            return res.status(400).json({ error: 'Message must have text or image' });
         }
-        const message = await saveGroupMessage({ text, sender_id });
+
+        const message = await saveGroupMessage({
+            text,
+            image_url: imageUrl,
+            sender_id: Number(sender_id),
+        });
+
         res.status(200).json(message);
     } catch (err) {
         console.error('Failed to save message', err);
         res.status(500).json({ error: 'Failed to save message' });
     }
 }
+

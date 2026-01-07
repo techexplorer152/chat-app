@@ -16,8 +16,9 @@ model User {
 }
 
 model messages {
-  id         Int       @id @default(autoincrement())
-  text       String
+  id         Int      @id @default(autoincrement())
+  text       String?
+  image_url  String?
   sender_id  Int
-  created_at DateTime? @default(now()) @db.Timestamp(6)
+  created_at DateTime @default(now()) @db.Timestamp(6)
 }
