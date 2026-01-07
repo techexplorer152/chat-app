@@ -65,10 +65,14 @@ function ChatPage() {
 
     return (
         <div className="chat-container">
+            <div className="sidebar">
+                <h2>ChatApp</h2>
+                <LogoutButton/>
+            </div>
             <div className="chat-area">
                 <div className="chat-header">
                     <h3>Group Chat</h3>
-                    <LogoutButton/>
+
                 </div>
 
                 <div className="messages">

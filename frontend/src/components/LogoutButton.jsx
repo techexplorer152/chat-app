@@ -1,6 +1,7 @@
 import React from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import './LogoutButton.css'
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
