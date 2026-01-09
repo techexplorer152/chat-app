@@ -1,12 +1,14 @@
 import React, { useEffect, useState } from "react";
 import { io } from "socket.io-client";
-import LogoutButton from '../components/LogoutButton.jsx';
+import LogoutButton from "../components/LogoutButton.jsx";
 import "./ChatPage.css";
 
 const SOCKET_URL = import.meta.env.VITE_SOCKET_URL;
 const API_URL = import.meta.env.VITE_API_URL;
 
-const socket = io(SOCKET_URL);
+const socket = io(SOCKET_URL, {
+    autoConnect: false,
+});
 
 function ChatPage() {
     const [messages, setMessages] = useState([]);
@@ -14,22 +16,27 @@ function ChatPage() {
 
     const user = JSON.parse(localStorage.getItem("user"));
 
+
     useEffect(() => {
+        if (!user) return;
+
         const fetchMessages = async () => {
             try {
                 const res = await fetch(`${API_URL}/messages`);
                 const data = await res.json();
+
                 setMessages(
                     data.map((m) => ({
                         ...m,
-                        sent: m.sender_id === user.id
+                        sent: m.sender_id === user.id,
                     }))
                 );
             } catch (err) {
                 console.error("Failed to fetch messages:", err);
             }
         };
-        if (user) fetchMessages();
+
+        fetchMessages();
     }, [user]);
 
     useEffect(() => {
@@ -40,7 +47,7 @@ function ChatPage() {
         socket.on("receive_message", (msg) => {
             setMessages((prev) => [
                 ...prev,
-                { ...msg, sent: msg.sender_id === user.id }
+                { ...msg, sent: msg.sender_id === user.id },
             ]);
         });
 
@@ -50,29 +57,48 @@ function ChatPage() {
         };
     }, [user]);
 
-    const handleSend = () => {
+    const handleSend = async () => {
         if (!input.trim() || !user) return;
 
-        const messageData = {
-            text: input,
-            senderId: user.id
-        };
+        try {
+            const res = await fetch(`${API_URL}/messages`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    text: input,
+                    sender_id: user.id,
+                }),
+            });
 
-        setMessages((prev) => [...prev, { ...messageData, sent: true }]);
-        socket.emit("send_message", messageData);
-        setInput("");
+            const savedMessage = await res.json();
+
+
+            socket.emit("send_message", savedMessage);
+
+
+            setMessages((prev) => [
+                ...prev,
+                { ...savedMessage, sent: true },
+            ]);
+
+            setInput("");
+        } catch (err) {
+            console.error("Failed to send message:", err);
+        }
     };
 
     return (
         <div className="chat-container">
             <div className="sidebar">
                 <h2>ChatApp</h2>
-                <LogoutButton/>
+                <LogoutButton />
             </div>
+
             <div className="chat-area">
                 <div className="chat-header">
                     <h3>Group Chat</h3>
-
                 </div>
 
                 <div className="messages">
@@ -99,4 +125,5 @@ function ChatPage() {
 }
 
 export default ChatPage;
+
 
