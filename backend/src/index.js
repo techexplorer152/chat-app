@@ -13,17 +13,27 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 const FRONTEND_URL = process.env.VITE_FRONTEND_URL;
 
-app.use(cors({ origin: FRONTEND_URL, credentials: true }));
+app.use(cors({
+    origin: FRONTEND_URL,
+    credentials: true,
+}));
+
+
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+
+app.use('/uploads', express.static('uploads'));
+
 
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/messages', messageRoutes);
 
-
 app.get('/', (req, res) => {
     res.send('This is a Test');
 });
+
 
 const server = http.createServer(app);
 const io = new Server(server, {
@@ -36,4 +46,6 @@ const io = new Server(server, {
 
 setupChatSockets(io);
 
-server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+server.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+});
