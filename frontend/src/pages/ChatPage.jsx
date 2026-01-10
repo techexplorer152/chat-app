@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from "react";
 import { io } from "socket.io-client";
 import LogoutButton from "../components/LogoutButton.jsx";
@@ -14,40 +15,38 @@ function ChatPage() {
     const [messages, setMessages] = useState([]);
     const [input, setInput] = useState("");
 
-    const user = JSON.parse(localStorage.getItem("user"));
-
+    const user = JSON.parse(localStorage.getItem("user") || "{}");
 
     useEffect(() => {
-        if (!user) return;
+        if (!user.id) return;
 
         const fetchMessages = async () => {
             try {
                 const res = await fetch(`${API_URL}/messages`);
                 const data = await res.json();
-
                 setMessages(
                     data.map((m) => ({
                         ...m,
-                        sent: m.sender_id === user.id,
+                        sent: Number(m.sender_id) === Number(user.id),
                     }))
                 );
             } catch (err) {
-                console.error("Failed to fetch messages:", err);
+                console.error("Fetch error:", err);
             }
         };
 
         fetchMessages();
-    }, [user]);
+    }, [user.id]);
 
     useEffect(() => {
-        if (!user) return;
+        if (!user.id) return;
 
         socket.connect();
 
         socket.on("receive_message", (msg) => {
             setMessages((prev) => [
                 ...prev,
-                { ...msg, sent: msg.sender_id === user.id },
+                { ...msg, sent: Number(msg.sender_id) === Number(user.id) },
             ]);
         });
 
@@ -55,28 +54,26 @@ function ChatPage() {
             socket.off("receive_message");
             socket.disconnect();
         };
-    }, [user]);
+    }, [user.id]);
 
     const handleSend = async () => {
-        if (!input.trim() || !user) return;
+        if (!input.trim() || !user.id) return;
 
         try {
             const res = await fetch(`${API_URL}/messages`, {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
+                headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     text: input,
                     sender_id: user.id,
                 }),
             });
 
+            if (!res.ok) throw new Error("Failed to send");
+
             const savedMessage = await res.json();
 
-
             socket.emit("send_message", savedMessage);
-
 
             setMessages((prev) => [
                 ...prev,
@@ -85,7 +82,7 @@ function ChatPage() {
 
             setInput("");
         } catch (err) {
-            console.error("Failed to send message:", err);
+            console.error("Send error:", err);
         }
     };
 
@@ -93,6 +90,11 @@ function ChatPage() {
         <div className="chat-container">
             <div className="sidebar">
                 <h2>ChatApp</h2>
+                <div className="chat-list">
+                    <div className="chat-item">
+                        <span># General Group</span>
+                    </div>
+                </div>
                 <LogoutButton />
             </div>
 
@@ -103,7 +105,7 @@ function ChatPage() {
 
                 <div className="messages">
                     {messages.map((m, i) => (
-                        <div key={i} className={`message ${m.sent ? "sent" : ""}`}>
+                        <div key={m.id || i} className={`message ${m.sent ? "sent" : ""}`}>
                             {m.text}
                         </div>
                     ))}
@@ -117,7 +119,7 @@ function ChatPage() {
                         onChange={(e) => setInput(e.target.value)}
                         onKeyDown={(e) => e.key === "Enter" && handleSend()}
                     />
-                    <button onClick={handleSend}>➡️</button>
+                    <button onClick={handleSend} type="button">➡️</button>
                 </div>
             </div>
         </div>
@@ -125,5 +127,3 @@ function ChatPage() {
 }
 
 export default ChatPage;
-
-
