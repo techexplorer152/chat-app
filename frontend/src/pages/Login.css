@@ -1,44 +1,50 @@
 html, body, #root {
     margin: 0;
     padding: 0;
-    height: 100%;
+    min-height: 100%;
 }
 
 .login {
     background: linear-gradient(135deg, #667eea, #764ba2);
-    width: 100vw;
-    height: 100vh;
+    width: 100%;
+    min-height: 100vh;
     display: flex;
     justify-content: center;
     align-items: center;
+    padding: 1rem;
 }
-.Welcome-Back{
-    font-size: 50px;
+
+/* Title */
+.Welcome-Back {
+    font-size: clamp(1.8rem, 5vw, 3.1rem);
     color: white;
 }
 
+/* Card */
 .container-Login {
     display: flex;
     flex-direction: column;
-    width:350px;
-    height:420px;
-
-    gap: 20px;
+    width: 100%;
+    max-width: 350px;
+    min-height: 420px;
+    gap: 1.25rem;
 
     backdrop-filter: blur(15px);
     background: rgba(255, 255, 255, 0.1);
     border: 1px solid rgba(255, 255, 255, 0.2);
     border-radius: 20px;
-    padding: 40px 30px;
+    padding: 2.5rem 1.8rem;
 
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
     text-align: center;
     color: #fff;
 }
 
-.container-Login input{
 
-    padding: 12px 40px 12px 15px;
+.container-Login input {
+    width: 75%;
+    margin: 1rem;
+    padding: 0.75rem 1rem;
     border-radius: 10px;
     border: none;
     outline: none;
@@ -46,17 +52,20 @@ html, body, #root {
     color: #fff;
     font-size: 1rem;
     transition: background 0.3s ease;
-
 }
+
 .container-Login input::placeholder {
     color: rgba(255, 255, 255, 0.6);
 }
-.container-Login button{
+
+
+.container-Login button {
     align-self: center;
+    width: 70%;
+    max-width: 200px;
+    padding: 0.75rem;
+    margin: 0.75rem;
 
-    width: 200px;
-
-    padding: 12px;
     background: linear-gradient(90deg, #4facfe, #00f2fe);
     border: none;
     border-radius: 10px;
@@ -66,15 +75,36 @@ html, body, #root {
     cursor: pointer;
     transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
-.container-Login button:hover{
+
+.container-Login button:hover {
     transform: translateY(-3px);
     box-shadow: 0 5px 15px rgba(118, 75, 162, 0.4);
 }
 
-.go-to-register{
-    font-size: 15px;
+
+.go-to-register,
+.go-to-login {
+    font-size: 0.9rem;
 }
 
-.go-to-login{
-    font-size: 15px;
+
+@media (max-width: 360px) {
+    .container-Login {
+        padding: 2rem 1.3rem;
+        min-height: unset;
+    }
+}
+
+
+@media (min-width: 768px) {
+    .container-Login {
+        max-width: 380px;
+    }
+}
+
+
+@media (min-width: 1200px) {
+    .container-Login {
+        max-width: 420px;
+    }
 }
