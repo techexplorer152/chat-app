@@ -15,3 +15,11 @@ export async function getAllGroupMessages() {
         orderBy: { created_at: 'asc' },
     });
 }
+
+export async function deleteGroupMessage(id) {
+    return await prisma.messages.delete({
+        where: {
+            id: Number(id),
+        },
+    });
+}
