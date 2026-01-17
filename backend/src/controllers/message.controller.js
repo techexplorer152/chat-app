@@ -1,13 +1,8 @@
-import { saveGroupMessage, getAllGroupMessages } from '../services/message.service.js';
-
-export async function getAllMessages(req, res) {
-    try {
-        const messages = await getAllGroupMessages();
-        res.status(200).json(messages);
-    } catch (err) {
-        res.status(500).json({ error: 'Failed to get messages' });
-    }
-}
+import {
+    saveGroupMessage,
+    getAllGroupMessages,
+    deleteGroupMessage
+} from '../services/message.service.js';
 
 export async function createMessage(req, res) {
     try {
@@ -15,7 +10,7 @@ export async function createMessage(req, res) {
         const imageUrl = req.file ? `/uploads/${req.file.filename}` : null;
 
         if (!text && !imageUrl) {
-            return res.status(400).json({ error: 'Message must have text or image' });
+            return res.status(400).json({ error: 'Message empty' });
         }
 
         const message = await saveGroupMessage({
@@ -26,6 +21,33 @@ export async function createMessage(req, res) {
 
         res.status(201).json(message);
     } catch (err) {
-        res.status(500).json({ error: 'Failed to save message' });
+        res.status(500).json({ error: 'Server error' });
+    }
+}
+
+export async function getAllMessages(req, res) {
+    try {
+        const messages = await getAllGroupMessages();
+        res.status(200).json(messages);
+    } catch (err) {
+        res.status(500).json({ error: 'Failed to fetch' });
+    }
+}
+
+export async function deleteMessage(req, res) {
+    try {
+        const { id } = req.params;
+
+        if (!id) {
+            return res.status(400).json({ error: 'ID required' });
+        }
+
+        await deleteGroupMessage(id);
+        res.status(200).json({ message: 'Deleted', id });
+    } catch (err) {
+        if (err.code === 'P2025') {
+            return res.status(404).json({ error: 'Not found' });
+        }
+        res.status(500).json({ error: 'Delete failed' });
     }
 }
