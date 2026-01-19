@@ -8,17 +8,23 @@ datasource db {
 }
 
 model User {
-  id        Int      @id @default(autoincrement())
-  username  String   @unique
-  email     String   @unique
-  password  String
-  createdAt DateTime @default(now())
+  id               Int        @id @default(autoincrement())
+  username         String     @unique
+  email            String     @unique
+  password         String
+  createdAt        DateTime   @default(now())
+  sentMessages     messages[] @relation("SentMessages")
+  receivedMessages messages[] @relation("ReceivedMessages")
 }
 
 model messages {
-  id         Int      @id @default(autoincrement())
-  text       String?
-  image_url  String?
-  sender_id  Int
-  created_at DateTime @default(now()) @db.Timestamp(6)
+  id          Int      @id @default(autoincrement())
+  text        String?
+  image_url   String?
+  sender_id   Int
+  receiver_id Int
+  created_at  DateTime @default(now()) @db.Timestamp(6)
+
+  sender   User @relation("SentMessages", fields: [sender_id], references: [id])
+  receiver User @relation("ReceivedMessages", fields: [receiver_id], references: [id])
 }
