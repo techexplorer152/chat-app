@@ -20,8 +20,13 @@ export async function findUserByEmail(email) {
 }
 
 
+
+
 export async function getAllUsers() {
-    return await prisma.user.findMany({
-        select: { id: true, username: true }
+    return prisma.user.findMany({
+        select: {
+            id: true,
+            username: true
+        }
     });
 }
