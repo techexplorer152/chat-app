@@ -11,11 +11,9 @@ export async function hashPassword(password) {
     return await bcrypt.hash(password, 10);
 }
 
-
 export async function comparePassword(password, hashedPassword) {
     return await bcrypt.compare(password, hashedPassword);
 }
-
 
 export function generateToken(user) {
     return jwt.sign({ id: user.id, email: user.email }, JWT_SECRET, {
@@ -23,20 +21,22 @@ export function generateToken(user) {
     });
 }
 
-
 export function generateRefreshToken(user) {
     return jwt.sign({ id: user.id }, REFRESH_SECRET, {
         expiresIn: REFRESH_EXPIRATION,
     });
 }
 
-
 export async function createUser({ email, username, password }) {
+    const hashedPassword = await hashPassword(password);
     return await prisma.user.create({
-        data: { email, username, password },
+        data: {
+            email,
+            username,
+            password: hashedPassword
+        },
     });
 }
-
 
 export async function findUserByEmail(email) {
     return await prisma.user.findUnique({
@@ -44,9 +44,8 @@ export async function findUserByEmail(email) {
     });
 }
 
-
 export async function findUserById(id) {
     return await prisma.user.findUnique({
-        where: { id },
+        where: { id: Number(id) },
     });
 }

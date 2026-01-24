@@ -26,6 +26,7 @@ export async function createMessage(req, res) {
 
         res.status(201).json(message);
     } catch (err) {
+        console.error(err);
         res.status(500).json({ error: 'Server error' });
     }
 }
@@ -41,6 +42,7 @@ export async function getAllMessages(req, res) {
         const messages = await getDirectMessages(user1, user2);
         res.status(200).json(messages);
     } catch (err) {
+        console.error(err);
         res.status(500).json({ error: 'Failed to fetch' });
     }
 }
@@ -48,17 +50,12 @@ export async function getAllMessages(req, res) {
 export async function deleteMessage(req, res) {
     try {
         const { id } = req.params;
-
-        if (!id) {
-            return res.status(400).json({ error: 'ID required' });
-        }
+        if (!id) return res.status(400).json({ error: 'ID required' });
 
         await removeMessage(id);
         res.status(200).json({ message: 'Deleted', id });
     } catch (err) {
-        if (err.code === 'P2025') {
-            return res.status(404).json({ error: 'Not found' });
-        }
+        if (err.code === 'P2025') return res.status(404).json({ error: 'Not found' });
         res.status(500).json({ error: 'Delete failed' });
     }
 }

@@ -1,7 +1,8 @@
+import jwt from "jsonwebtoken";
 import {
     findUserByEmail,
+    findUserById,
     createUser,
-    hashPassword,
     comparePassword,
     generateToken,
     generateRefreshToken,
@@ -17,12 +18,10 @@ export async function register(req, res) {
         if (existingUser)
             return res.status(400).json({ message: "User already exists." });
 
-        const hashedPassword = await hashPassword(password);
-        const newUser = await createUser({ email, username, password: hashedPassword });
+        const newUser = await createUser({ email, username, password });
 
         const accessToken = generateToken(newUser);
         const refreshToken = generateRefreshToken(newUser);
-
 
         res.cookie("refreshToken", refreshToken, {
             httpOnly: true,

@@ -1,38 +1,38 @@
 import prisma from '../db/connect.js';
 
 export async function saveDirectMessage({ text, image_url, sender_id, receiver_id }) {
-    return prisma.messages.create({
+    return prisma.message.create({
         data: {
             text,
-            image_url,
-            sender_id: Number(sender_id),
-            receiver_id: Number(receiver_id),
+            imageUrl: image_url,
+            senderId: Number(sender_id),
+            receiverId: Number(receiver_id),
         },
     });
 }
 
 export async function getDirectMessages(user1Id, user2Id) {
-    return prisma.messages.findMany({
+    return prisma.message.findMany({
         where: {
             OR: [
                 {
-                    sender_id: Number(user1Id),
-                    receiver_id: Number(user2Id),
+                    senderId: Number(user1Id),
+                    receiverId: Number(user2Id),
                 },
                 {
-                    sender_id: Number(user2Id),
-                    receiver_id: Number(user1Id),
+                    senderId: Number(user2Id),
+                    receiverId: Number(user1Id),
                 },
             ],
         },
         orderBy: {
-            created_at: 'asc',
+            createdAt: 'asc',
         },
     });
 }
 
 export async function deleteMessage(id) {
-    return await prisma.messages.delete({
+    return await prisma.message.delete({
         where: {
             id: Number(id),
         },
