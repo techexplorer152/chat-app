@@ -137,7 +137,7 @@ function ChatPage() {
     };
 
     return (
-        <div className="chat-container">
+        <div className={`chat-container ${selectedUser ? "user-selected" : ""}`}>
             <div className="sidebar">
                 <h2>ChatApp</h2>
                 <div className="chat-list">
@@ -156,6 +156,11 @@ function ChatPage() {
 
             <div className="chat-area">
                 <div className="chat-header">
+                    {selectedUser && (
+                        <button className="mobile-back-btn" onClick={() => setSelectedUser(null)}>
+                            ⬅️
+                        </button>
+                    )}
                     <h3>{selectedUser ? `Chat with ${selectedUser.username}` : "Select a user"}</h3>
                 </div>
 
