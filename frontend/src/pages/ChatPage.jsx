@@ -35,7 +35,7 @@ function ChatPage() {
                 const res = await fetch(`${API_URL}/users`);
                 const data = await res.json();
                 setUsers(data.filter(u => u.id !== user.id));
-            } catch (err) { console.error("Users fetch error:", err); }
+            } catch (err) { console.error(err); }
         };
         fetchUsers();
     }, [user.id]);
@@ -48,9 +48,9 @@ function ChatPage() {
                 const data = await res.json();
                 setMessages(data.map((m) => ({
                     ...m,
-                    sent: Number(m.sender_id) === Number(user.id),
+                    sent: Number(m.senderId || m.sender_id) === Number(user.id),
                 })));
-            } catch (err) { console.error("Fetch error:", err); }
+            } catch (err) { console.error(err); }
         };
         fetchMessages();
     }, [user.id, selectedUser]);
@@ -60,11 +60,19 @@ function ChatPage() {
         socket.connect();
 
         socket.on("receive_message", (msg) => {
-            if (
-                (Number(msg.sender_id) === Number(selectedUser?.id) && Number(msg.receiver_id) === Number(user.id)) ||
-                (Number(msg.sender_id) === Number(user.id) && Number(msg.receiver_id) === Number(selectedUser?.id))
-            ) {
-                setMessages((prev) => [...prev, { ...msg, sent: Number(msg.sender_id) === Number(user.id) }]);
+            const isRelevant =
+                (Number(msg.senderId || msg.sender_id) === Number(selectedUser?.id) && Number(msg.receiverId || msg.receiver_id) === Number(user.id)) ||
+                (Number(msg.senderId || msg.sender_id) === Number(user.id) && Number(msg.receiverId || msg.receiver_id) === Number(selectedUser?.id));
+
+            if (isRelevant) {
+                setMessages((prev) => {
+                    const alreadyExists = prev.some(m => m.id === msg.id);
+                    if (alreadyExists) return prev;
+                    return [...prev, {
+                        ...msg,
+                        sent: Number(msg.senderId || msg.sender_id) === Number(user.id)
+                    }];
+                });
             }
         });
 
@@ -89,14 +97,12 @@ function ChatPage() {
 
     const handleDelete = async (messageId) => {
         try {
-            const res = await fetch(`${API_URL}/messages/${messageId}`, {
-                method: "DELETE",
-            });
+            const res = await fetch(`${API_URL}/messages/${messageId}`, { method: "DELETE" });
             if (res.ok) {
                 socket.emit("delete_message", messageId);
                 setMessages((prev) => prev.filter((m) => m.id !== messageId));
             }
-        } catch (err) { console.error("Delete error:", err); }
+        } catch (err) { console.error(err); }
     };
 
     const handleSend = async () => {
@@ -117,13 +123,17 @@ function ChatPage() {
             const savedMessage = await res.json();
 
             socket.emit("send_message", savedMessage);
-            setMessages((prev) => [...prev, { ...savedMessage, sent: true }]);
+            setMessages((prev) => {
+                const alreadyExists = prev.some(m => m.id === savedMessage.id);
+                if (alreadyExists) return prev;
+                return [...prev, { ...savedMessage, sent: true }];
+            });
 
             setInput("");
             setImage(null);
             setPreview(null);
             if (fileInputRef.current) fileInputRef.current.value = "";
-        } catch (err) { console.error("Send error:", err); }
+        } catch (err) { console.error(err); }
     };
 
     return (
@@ -146,7 +156,7 @@ function ChatPage() {
 
             <div className="chat-area">
                 <div className="chat-header">
-                    <h3>{selectedUser ? `Chat with ${selectedUser.username}` : "Select a user to start chatting"}</h3>
+                    <h3>{selectedUser ? `Chat with ${selectedUser.username}` : "Select a user"}</h3>
                 </div>
 
                 <div className="messages">
@@ -154,12 +164,14 @@ function ChatPage() {
                         messages.map((m, i) => (
                             <div key={m.id || i} className={`message ${m.sent ? "sent" : ""}`}>
                                 {m.sent && <button className="delete-btn" onClick={() => handleDelete(m.id)}>×</button>}
-                                {m.image_url && <img src={`${BACKEND_URL}${m.image_url}`} alt="upload" className="message-image" />}
+                                {(m.imageUrl || m.image_url) && (
+                                    <img src={`${BACKEND_URL}${m.imageUrl || m.image_url}`} alt="upload" className="message-image" />
+                                )}
                                 {m.text && <p>{m.text}</p>}
                             </div>
                         ))
                     ) : (
-                        <div className="no-chat">Pick a contact from the left to begin.</div>
+                        <div className="no-chat">Select a contact to start.</div>
                     )}
                     <div ref={messagesEndRef} />
                 </div>

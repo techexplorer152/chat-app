@@ -18,22 +18,18 @@ app.use(cors({
     credentials: true,
 }));
 
-
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-
 app.use('/uploads', express.static('uploads'));
-
 
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/messages', messageRoutes);
 
 app.get('/', (req, res) => {
-    res.send('This is a Test');
+    res.send('Server is running');
 });
-
 
 const server = http.createServer(app);
 const io = new Server(server, {
@@ -46,6 +42,7 @@ const io = new Server(server, {
 
 setupChatSockets(io);
 
-server.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
+server.listen(PORT, '0.0.0.0', () => {
+    console.log(`Server running on all interfaces at port ${PORT}`);
+    console.log(`CORS allowed for: ${FRONTEND_URL}`);
 });
