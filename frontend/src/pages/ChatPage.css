@@ -1,4 +1,4 @@
-/* RESET */
+
 * {
     box-sizing: border-box;
     margin: 0;
@@ -15,7 +15,7 @@
     overflow: hidden;
 }
 
-/* SIDEBAR */
+
 .sidebar {
     width: 280px;
     background-color: #1f2937;
@@ -61,14 +61,14 @@
     font-weight: 500;
 }
 
-/* CHAT AREA */
+
 .chat-area {
     flex: 1;
     display: flex;
     flex-direction: column;
     background-color: #ffffff;
     border-left: 1px solid #e5e7eb;
-    min-width: 0; /* prevents overflow horizontally */
+    min-width: 0;
 }
 
 .chat-header {
@@ -94,7 +94,7 @@
     cursor: pointer;
 }
 
-/* MESSAGES */
+
 .messages {
     flex: 1;
     padding: 20px;
@@ -162,7 +162,7 @@
     margin-bottom: 8px;
 }
 
-/* IMAGE PREVIEW */
+
 .image-preview-container {
     display: flex;
     align-items: center;
@@ -190,7 +190,7 @@
     font-size: 12px;
 }
 
-/* INPUT AREA */
+
 .message-input {
     display: flex;
     padding: 10px 20px;
@@ -229,20 +229,20 @@
     font-size: 18px;
 }
 
-/* MOBILE FIXES */
+
 @media (max-width: 768px) {
 
-    /* Hide sidebar but allow full chat view */
+
     .sidebar {
         display: none;
     }
 
-    /* Allow chat to take full width */
+
     .chat-area {
         width: 100%;
     }
 
-    /* Improve spacing on mobile */
+
     .messages {
         padding: 15px;
     }
@@ -252,12 +252,12 @@
         font-size: 16px;
     }
 
-    /* Show back button */
+
     .mobile-back-btn {
         display: block;
     }
 
-    /* When no user selected, show sidebar list */
+
     .chat-container:not(.user-selected) .chat-area {
         display: none;
     }

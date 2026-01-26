@@ -13,8 +13,19 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 const FRONTEND_URL = process.env.VITE_FRONTEND_URL;
 
+const allowedOrigins = [
+    FRONTEND_URL,
+    "http://localhost:5173"
+];
+
 app.use(cors({
-    origin: FRONTEND_URL,
+    origin: function (origin, callback) {
+        if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+            callback(null, true);
+        } else {
+            callback(new Error('Not allowed by CORS'));
+        }
+    },
     credentials: true,
 }));
 
@@ -34,7 +45,7 @@ app.get('/', (req, res) => {
 const server = http.createServer(app);
 const io = new Server(server, {
     cors: {
-        origin: FRONTEND_URL,
+        origin: allowedOrigins,
         methods: ['GET', 'POST'],
         credentials: true,
     },
@@ -43,6 +54,7 @@ const io = new Server(server, {
 setupChatSockets(io);
 
 server.listen(PORT, '0.0.0.0', () => {
-    console.log(`Server running on all interfaces at port ${PORT}`);
-    console.log(`CORS allowed for: ${FRONTEND_URL}`);
+    console.log(`Server running on port ${PORT}`);
+    console.log(`Local: http://localhost:${PORT}`);
+    console.log(`Network: http://10.176.170.43:${PORT}`);
 });
