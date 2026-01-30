@@ -30,5 +30,7 @@ backend/.env
 .env
 notes
 
+backend/uploads/
+
 /generated/prisma
 hey.html
