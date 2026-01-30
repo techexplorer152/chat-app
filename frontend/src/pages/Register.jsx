@@ -4,30 +4,36 @@ import React from "react";
 import { Link, useNavigate } from "react-router-dom";
 import "./Register.css";
 
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
-
 function Register() {
     const [username, setUsername] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
 
+    const currentHost = window.location.hostname;
+    const DYNAMIC_BACKEND_URL = `http://${currentHost}:5000`;
+
     const handleSubmit = async (e) => {
-        e.preventDefault();
+        if (e) e.preventDefault();
+        setLoading(true);
         try {
             const res = await axios.post(
-                `${BACKEND_URL}/api/auth/register`,
+                `${DYNAMIC_BACKEND_URL}/api/auth/register`,
                 { username, email, password },
                 { withCredentials: true }
             );
 
-
             const { user } = res.data;
-
-
-            navigate("/chat");
+            if (user) {
+                localStorage.setItem("user", JSON.stringify(user));
+                navigate("/chat");
+            }
         } catch (err) {
             console.error("Registration error:", err);
+            alert("Registration failed. Please try again.");
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -58,8 +64,12 @@ function Register() {
                     onChange={(e) => setPassword(e.target.value)}
                 />
 
-                <button className="Register-button" onClick={handleSubmit}>
-                    Register
+                <button
+                    className="Register-button"
+                    onClick={handleSubmit}
+                    disabled={loading}
+                >
+                    {loading ? "Registering..." : "Register"}
                 </button>
 
                 <p className="go-to-login">

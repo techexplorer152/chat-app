@@ -3,9 +3,10 @@ import { io } from "socket.io-client";
 import LogoutButton from "../components/LogoutButton.jsx";
 import "./ChatPage.css";
 
-const SOCKET_URL = import.meta.env.VITE_SOCKET_URL;
-const API_URL = import.meta.env.VITE_API_URL;
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
+const currentHost = window.location.hostname;
+const SOCKET_URL = `http://${currentHost}:5000`;
+const API_URL = `http://${currentHost}:5000/api`;
+const BACKEND_URL = `http://${currentHost}:5000`;
 
 const socket = io(SOCKET_URL, { autoConnect: false });
 

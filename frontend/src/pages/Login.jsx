@@ -4,13 +4,14 @@ import React from "react";
 import './Login.css';
 import { Link, useNavigate } from 'react-router-dom';
 
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
-
 function Login() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
+
+    const currentHost = window.location.hostname;
+    const DYNAMIC_BACKEND_URL = `http://${currentHost}:5000`;
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -18,7 +19,7 @@ function Login() {
 
         try {
             const res = await axios.post(
-                `${BACKEND_URL}/api/auth/login`,
+                `${DYNAMIC_BACKEND_URL}/api/auth/login`,
                 { email, password },
                 { withCredentials: true }
             );
