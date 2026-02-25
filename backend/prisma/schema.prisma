@@ -14,10 +14,36 @@ model User {
   password  String
   createdAt DateTime @default(now())
 
-  sentMessages     Message[] @relation("SentMessages")
-  receivedMessages Message[] @relation("ReceivedMessages")
+  sentMessages     Message[]     @relation("SentMessages")
+  receivedMessages Message[]     @relation("ReceivedMessages")
+  groups           GroupMember[]
 
   @@map("users")
+}
+
+model Group {
+  id          Int      @id @default(autoincrement())
+  name        String
+  description String?
+  createdAt   DateTime @default(now())
+
+  members     GroupMember[]
+  messages    Message[]     @relation("GroupMessages")
+
+  @@map("groups")
+}
+
+model GroupMember {
+  id      Int    @id @default(autoincrement())
+  userId  Int
+  groupId Int
+  role    String @default("member")
+
+  user    User   @relation(fields: [userId], references: [id])
+  group   Group  @relation(fields: [groupId], references: [id])
+
+  @@unique([userId, groupId])
+  @@map("group_members")
 }
 
 model Message {
@@ -25,11 +51,13 @@ model Message {
   text       String?
   imageUrl   String?
   senderId   Int
-  receiverId Int
+  receiverId Int?
+  groupId    Int?
   createdAt  DateTime @default(now())
 
-  sender   User @relation("SentMessages", fields: [senderId], references: [id])
-  receiver User @relation("ReceivedMessages", fields: [receiverId], references: [id])
+  sender   User   @relation("SentMessages", fields: [senderId], references: [id])
+  receiver User?  @relation("ReceivedMessages", fields: [receiverId], references: [id])
+  group    Group? @relation("GroupMessages", fields: [groupId], references: [id])
 
   @@map("messages")
 }
