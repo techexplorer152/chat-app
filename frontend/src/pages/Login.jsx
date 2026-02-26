@@ -20,14 +20,14 @@ function Login() {
         try {
             const res = await axios.post(
                 `${DYNAMIC_BACKEND_URL}/api/auth/login`,
-                { email, password },
-                { withCredentials: true }
+                { email, password }
             );
 
-            const { user } = res.data;
+            const { user, token } = res.data;
 
-            if (user) {
+            if (user && token) {
                 localStorage.setItem("user", JSON.stringify(user));
+                localStorage.setItem("token", token); 
                 navigate("/chat");
             }
         } catch (err) {

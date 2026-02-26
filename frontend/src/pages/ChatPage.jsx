@@ -4,213 +4,234 @@ import LogoutButton from "../components/LogoutButton.jsx";
 import "./ChatPage.css";
 
 const currentHost = window.location.hostname;
-const SOCKET_URL = `http://${currentHost}:5000`;
 const API_URL = `http://${currentHost}:5000/api`;
-const BACKEND_URL = `http://${currentHost}:5000`;
+const SOCKET_URL = `http://${currentHost}:5000`;
 
-const socket = io(SOCKET_URL, { autoConnect: false });
+const socket = io(SOCKET_URL, {
+    autoConnect: false,
+    transports: ["websocket", "polling"],
+});
 
 function ChatPage() {
     const [users, setUsers] = useState([]);
-    const [selectedUser, setSelectedUser] = useState(null);
+    const [groups, setGroups] = useState([]);
+    const [selectedChat, setSelectedChat] = useState(null);
     const [messages, setMessages] = useState([]);
     const [input, setInput] = useState("");
     const [image, setImage] = useState(null);
     const [preview, setPreview] = useState(null);
-    const fileInputRef = useRef(null);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [newGroupName, setNewGroupName] = useState("");
+    const [newGroupDesc, setNewGroupDesc] = useState("");
+
     const messagesEndRef = useRef(null);
-
     const user = JSON.parse(localStorage.getItem("user") || "{}");
-
-    const scrollToBottom = () => {
-        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-    };
+    const token = localStorage.getItem("token");
 
     useEffect(() => {
-        scrollToBottom();
-    }, [messages]);
-
-    useEffect(() => {
-        const fetchUsers = async () => {
+        const fetchData = async () => {
             try {
-                const res = await fetch(`${API_URL}/users`);
-                const data = await res.json();
-                setUsers(data.filter(u => u.id !== user.id));
-            } catch (err) { console.error(err); }
+                const [usersRes, groupsRes] = await Promise.all([
+                    fetch(`${API_URL}/users`, {
+                        headers: { Authorization: `Bearer ${token}` },
+                    }),
+                    fetch(`${API_URL}/groups/me`, {
+                        headers: { Authorization: `Bearer ${token}` },
+                    }),
+                ]);
+                const usersData = await usersRes.json();
+                const groupsData = await groupsRes.json();
+                setUsers(Array.isArray(usersData) ? usersData.filter(u => u.id !== user.id) : []);
+                setGroups(Array.isArray(groupsData) ? groupsData : []);
+            } catch (err) {
+                console.error(err);
+            }
         };
-        fetchUsers();
-    }, [user.id]);
+        fetchData();
+    }, [user.id, token]);
 
     useEffect(() => {
-        if (!user.id || !selectedUser) return;
+        if (!selectedChat || !selectedChat.isGroup) return;
+        socket.emit("join_group", selectedChat.id);
+        return () => socket.emit("leave_group", selectedChat.id);
+    }, [selectedChat]);
+
+    useEffect(() => {
+        if (!user.id || !selectedChat) return;
         const fetchMessages = async () => {
+            const url = selectedChat.isGroup
+                ? `${API_URL}/messages/group/${selectedChat.id}`
+                : `${API_URL}/messages?user1=${user.id}&user2=${selectedChat.id}`;
             try {
-                const res = await fetch(`${API_URL}/messages?user1=${user.id}&user2=${selectedUser.id}`);
+                const res = await fetch(url, {
+                    headers: { Authorization: `Bearer ${token}` },
+                });
                 const data = await res.json();
-                setMessages(data.map((m) => ({
-                    ...m,
-                    sent: Number(m.senderId || m.sender_id) === Number(user.id),
-                })));
-            } catch (err) { console.error(err); }
+                setMessages(data.map(m => ({ ...m, sent: Number(m.senderId || m.sender_id) === Number(user.id) })));
+            } catch (err) {
+                console.error(err);
+            }
         };
         fetchMessages();
-    }, [user.id, selectedUser]);
+    }, [user.id, selectedChat, token]);
 
     useEffect(() => {
         if (!user.id) return;
         socket.connect();
-
         socket.on("receive_message", (msg) => {
-            const isRelevant =
-                (Number(msg.senderId || msg.sender_id) === Number(selectedUser?.id) && Number(msg.receiverId || msg.receiver_id) === Number(user.id)) ||
-                (Number(msg.senderId || msg.sender_id) === Number(user.id) && Number(msg.receiverId || msg.receiver_id) === Number(selectedUser?.id));
-
+            let isRelevant = false;
+            if (selectedChat?.isGroup) {
+                isRelevant = Number(msg.groupId) === Number(selectedChat.id);
+            } else {
+                isRelevant =
+                    (Number(msg.senderId || msg.sender_id) === Number(selectedChat?.id) && Number(msg.receiverId || msg.receiver_id) === Number(user.id)) ||
+                    (Number(msg.senderId || msg.sender_id) === Number(user.id) && Number(msg.receiverId || msg.receiver_id) === Number(selectedChat?.id));
+            }
             if (isRelevant) {
-                setMessages((prev) => {
-                    const alreadyExists = prev.some(m => m.id === msg.id);
-                    if (alreadyExists) return prev;
-                    return [...prev, {
-                        ...msg,
-                        sent: Number(msg.senderId || msg.sender_id) === Number(user.id)
-                    }];
+                setMessages(prev => {
+                    if (prev.some(m => m.id === msg.id)) return prev;
+                    return [...prev, { ...msg, sent: Number(msg.senderId || msg.sender_id) === Number(user.id) }];
                 });
             }
         });
-
-        socket.on("message_deleted", (deletedId) => {
-            setMessages((prev) => prev.filter((m) => m.id !== deletedId));
-        });
-
         return () => {
             socket.off("receive_message");
-            socket.off("message_deleted");
             socket.disconnect();
         };
-    }, [user.id, selectedUser]);
+    }, [user.id, selectedChat]);
 
-    const handleImageChange = (e) => {
-        const file = e.target.files[0];
-        if (file) {
-            setImage(file);
-            setPreview(URL.createObjectURL(file));
+    const handleCreateGroup = async (e) => {
+        e.preventDefault();
+        if (!newGroupName.trim()) return;
+        try {
+            const res = await fetch(`${API_URL}/groups`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
+                },
+                body: JSON.stringify({ name: newGroupName, description: newGroupDesc }),
+            });
+            if (res.ok) {
+                const newGroup = await res.json();
+                setGroups(prev => [...prev, newGroup]);
+                setSelectedChat({ ...newGroup, isGroup: true });
+                setIsModalOpen(false);
+                setNewGroupName("");
+                setNewGroupDesc("");
+            }
+        } catch (err) {
+            console.error(err);
         }
     };
 
-    const handleDelete = async (messageId) => {
-        try {
-            const res = await fetch(`${API_URL}/messages/${messageId}`, { method: "DELETE" });
-            if (res.ok) {
-                socket.emit("delete_message", messageId);
-                setMessages((prev) => prev.filter((m) => m.id !== messageId));
-            }
-        } catch (err) { console.error(err); }
-    };
-
     const handleSend = async () => {
-        if ((!input.trim() && !image) || !user.id || !selectedUser) return;
+        if ((!input.trim() && !image) || !user.id || !selectedChat) return;
         try {
             const formData = new FormData();
             formData.append("text", input);
             formData.append("sender_id", user.id);
-            formData.append("receiver_id", selectedUser.id);
+            if (selectedChat.isGroup) formData.append("groupId", selectedChat.id);
+            else formData.append("receiver_id", selectedChat.id);
             if (image) formData.append("image", image);
 
-            const res = await fetch(`${API_URL}/messages`, {
-                method: "POST",
-                body: formData,
-            });
-
-            if (!res.ok) throw new Error("Failed to send");
+            const res = await fetch(`${API_URL}/messages`, { method: "POST", body: formData, headers: { Authorization: `Bearer ${token}` } });
             const savedMessage = await res.json();
-
             socket.emit("send_message", savedMessage);
-            setMessages((prev) => {
-                const alreadyExists = prev.some(m => m.id === savedMessage.id);
-                if (alreadyExists) return prev;
-                return [...prev, { ...savedMessage, sent: true }];
-            });
-
             setInput("");
             setImage(null);
             setPreview(null);
-            if (fileInputRef.current) fileInputRef.current.value = "";
-        } catch (err) { console.error(err); }
+        } catch (err) {
+            console.error(err);
+        }
     };
 
     return (
-        <div className={`chat-container ${selectedUser ? "user-selected" : ""}`}>
+        <div className={`chat-container ${selectedChat ? "user-selected" : ""}`}>
             <div className="sidebar">
-                <h2>ChatApp</h2>
-                <div className="chat-list">
-                    {users.map((u) => (
+                <h2>Slack Clone</h2>
+                <div className="section">
+                    <div className="section-header">
+                        <h3>Channels</h3>
+                        <button className="add-btn" onClick={() => setIsModalOpen(true)}>+</button>
+                    </div>
+                    {groups.map(g => (
                         <div
-                            key={u.id}
-                            className={`chat-item ${selectedUser?.id === u.id ? "active" : ""}`}
-                            onClick={() => setSelectedUser(u)}
+                            key={`g-${g.id}`}
+                            className={`chat-item ${selectedChat?.id === g.id && selectedChat.isGroup ? "active" : ""}`}
+                            onClick={() => setSelectedChat({ ...g, isGroup: true })}
                         >
-                            <span>{u.username}</span>
+                            # {g.name}
+                        </div>
+                    ))}
+                </div>
+                <div className="section">
+                    <h3>Direct Messages</h3>
+                    {users.map(u => (
+                        <div
+                            key={`u-${u.id}`}
+                            className={`chat-item ${selectedChat?.id === u.id && !selectedChat.isGroup ? "active" : ""}`}
+                            onClick={() => setSelectedChat({ ...u, isGroup: false })}
+                        >
+                            ● {u.username}
                         </div>
                     ))}
                 </div>
                 <LogoutButton />
             </div>
-
             <div className="chat-area">
                 <div className="chat-header">
-                    {selectedUser && (
-                        <button className="mobile-back-btn" onClick={() => setSelectedUser(null)}>
-                            ⬅️
-                        </button>
-                    )}
-                    <h3>{selectedUser ? `Chat with ${selectedUser.username}` : "Select a user"}</h3>
+                    <h3>{selectedChat ? (selectedChat.isGroup ? `# ${selectedChat.name}` : `Chat with ${selectedChat.username}`) : "Select a conversation"}</h3>
                 </div>
-
                 <div className="messages">
-                    {selectedUser ? (
+                    {selectedChat ? (
                         messages.map((m, i) => (
                             <div key={m.id || i} className={`message ${m.sent ? "sent" : ""}`}>
-                                {m.sent && <button className="delete-btn" onClick={() => handleDelete(m.id)}>×</button>}
-                                {(m.imageUrl || m.image_url) && (
-                                    <img src={`${BACKEND_URL}${m.imageUrl || m.image_url}`} alt="upload" className="message-image" />
-                                )}
+                                {!m.sent && <small>{m.sender?.username}</small>}
                                 {m.text && <p>{m.text}</p>}
                             </div>
                         ))
-                    ) : (
-                        <div className="no-chat">Select a contact to start.</div>
-                    )}
+                    ) : <div className="no-chat">Pick a channel or user to start chatting.</div>}
                     <div ref={messagesEndRef} />
                 </div>
-
-                {preview && (
-                    <div className="image-preview-container">
-                        <img src={preview} alt="preview" />
-                        <button onClick={() => { setImage(null); setPreview(null); }}>✕</button>
-                    </div>
-                )}
-
                 <div className="message-input">
-                    <label htmlFor="file-upload" className="custom-file-upload">📷</label>
-                    <input
-                        id="file-upload"
-                        type="file"
-                        accept="image/*"
-                        ref={fileInputRef}
-                        onChange={handleImageChange}
-                        style={{ display: 'none' }}
-                        disabled={!selectedUser}
-                    />
                     <input
                         type="text"
-                        placeholder="Type a message..."
                         value={input}
-                        onChange={(e) => setInput(e.target.value)}
-                        onKeyDown={(e) => e.key === "Enter" && handleSend()}
-                        disabled={!selectedUser}
+                        onChange={e => setInput(e.target.value)}
+                        onKeyDown={e => e.key === "Enter" && handleSend()}
+                        disabled={!selectedChat}
+                        placeholder="Message..."
                     />
-                    <button onClick={handleSend} type="button" disabled={!selectedUser}>➡️</button>
+                    <button onClick={handleSend} disabled={!selectedChat}>Send</button>
                 </div>
             </div>
+            {isModalOpen && (
+                <div className="modal-overlay">
+                    <div className="modal">
+                        <h3>Create New Channel</h3>
+                        <form onSubmit={handleCreateGroup}>
+                            <input
+                                type="text"
+                                placeholder="Channel Name"
+                                value={newGroupName}
+                                onChange={e => setNewGroupName(e.target.value)}
+                                required
+                            />
+                            <input
+                                type="text"
+                                placeholder="Description"
+                                value={newGroupDesc}
+                                onChange={e => setNewGroupDesc(e.target.value)}
+                            />
+                            <div className="modal-actions">
+                                <button type="button" onClick={() => setIsModalOpen(false)}>Cancel</button>
+                                <button type="submit">Create</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
