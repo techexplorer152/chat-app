@@ -27,7 +27,7 @@ function Login() {
 
             if (user && token) {
                 localStorage.setItem("user", JSON.stringify(user));
-                localStorage.setItem("token", token); 
+                localStorage.setItem("token", token);
                 navigate("/chat");
             }
         } catch (err) {

@@ -16,9 +16,7 @@ export async function saveDirectMessage({ text, image_url, sender_id, receiver_i
             receiverId: rId,
         },
         include: {
-            sender: {
-                select: { id: true, username: true }
-            }
+            sender: { select: { id: true, username: true } }
         }
     });
 }
@@ -39,9 +37,7 @@ export async function saveGroupMessage({ text, image_url, sender_id, groupId }) 
             groupId: gId,
         },
         include: {
-            sender: {
-                select: { id: true, username: true }
-            }
+            sender: { select: { id: true, username: true } }
         }
     });
 }
@@ -58,13 +54,9 @@ export async function getDirectMessages(user1Id, user2Id) {
             ],
         },
         include: {
-            sender: {
-                select: { id: true, username: true }
-            }
+            sender: { select: { id: true, username: true } }
         },
-        orderBy: {
-            createdAt: 'asc',
-        },
+        orderBy: { createdAt: 'asc' }
     });
 }
 
@@ -72,24 +64,16 @@ export async function getGroupMessages(groupId) {
     const gId = Number(groupId);
 
     return await prisma.message.findMany({
-        where: {
-            groupId: gId,
-        },
+        where: { groupId: gId },
         include: {
-            sender: {
-                select: { id: true, username: true }
-            }
+            sender: { select: { id: true, username: true } }
         },
-        orderBy: {
-            createdAt: 'asc',
-        },
+        orderBy: { createdAt: 'asc' }
     });
 }
 
 export async function deleteMessage(id) {
     return await prisma.message.delete({
-        where: {
-            id: Number(id),
-        },
+        where: { id: Number(id) }
     });
 }
