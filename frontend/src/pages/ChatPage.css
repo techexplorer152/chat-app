@@ -1,3 +1,56 @@
+/*--------------section-header-----------------------*/
+
+.section-header {
+    --sidebar-bg: #1a1d21;
+    --main-bg: #ffffff;
+    --accent-blue: #611f69;
+    --text-main: #1d1c1d;
+    --text-muted: #616061;
+    --border-color: #e2e2e2;
+    --hover-bg: rgba(255, 255, 255, 0.1);
+    display: flex;
+    gap:20px;
+    align-items: center;
+    justify-content: center;
+    padding: 32px 20px 12px;
+}
+
+
+.section-header h3 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #ffffff;
+    letter-spacing: -1px;
+    line-height: 1;
+    position: relative;
+}
+
+
+.add-btn {
+    width: 32px;
+    height: 32px;
+    background: #3b82f6;
+    color: #ffffff;
+    border: none;
+    font-size: 1.4rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 14px rgba(59, 130, 246, 0.4);
+}
+
+.add-btn:hover {
+    background: #2563eb;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(59, 130, 246, 0.6);
+}
+
+.add-btn:active {
+    transform: translateY(0);
+}
 /*-----------------The Css for group creation----------*/
 
 .modal-overlay {
@@ -392,4 +445,5 @@
         display: flex;
         width: 100%;
     }
+
 }

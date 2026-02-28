@@ -189,7 +189,7 @@ function ChatPage() {
                 <h2>Slack Clone</h2>
                 <div className="section">
                     <div className="section-header">
-                        <h3>Channels</h3>
+                        <h3>CHANNELS</h3>
                         <button className="add-btn" onClick={() => setIsModalOpen(true)}>+</button>
                     </div>
                     {groups.map(g => (
@@ -244,7 +244,7 @@ function ChatPage() {
 
                 <div className="message-input">
                     <label className="custom-file-upload">
-                        📎
+                        <div style={{borderRadius:"100%",background:"#e3dfd3",width:"25px",height:"25px",display:"flex",alignItems:"center",justifyContent:"center"}}>+</div>
                         <input type="file" accept="image/*" style={{ display: "none" }} onChange={handleSelectImage} />
                     </label>
                     <input type="text" value={input} onChange={e => setInput(e.target.value)} onKeyDown={e => e.key === "Enter" && handleSend()} disabled={!selectedChat} placeholder="Message..." />
