@@ -46,3 +46,28 @@ export const addUserToGroup = async (groupId, userId) => {
         },
     });
 };
+
+
+
+export const addUserToGroup = async (groupId, userId, role = "member") => {
+    return await prisma.groupMember.create({
+        data: {
+            groupId: parseInt(groupId),
+            userId: parseInt(userId),
+            role: role,
+        },
+        include: {
+            user: { select: { id: true, username: true } }
+        }
+    });
+};
+
+
+export const getGroupMembers = async (groupId) => {
+    return await prisma.groupMember.findMany({
+        where: { groupId: parseInt(groupId) },
+        include: {
+            user: { select: { id: true, username: true } }
+        }
+    });
+};
