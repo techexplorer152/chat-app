@@ -43,6 +43,30 @@ export async function getMyGroups(req, res) {
     }
 }
 
+export async function addUser(req, res) {
+    try {
+        const { groupId } = req.params;
+        const { userId } = req.body; 
+
+        if (!groupId || !userId) {
+            return res.status(400).json({ message: "Group ID and User ID are required." });
+        }
+
+        const membership = await groupService.addUserToGroup(
+            parseInt(groupId),
+            parseInt(userId)
+        );
+
+        res.status(200).json({ message: "User added successfully", membership });
+    } catch (err) {
+        console.error("Add user error:", err);
+        res.status(500).json({
+            message: "Failed to add user. They might already be a member.",
+            error: err.message
+        });
+    }
+}
+
 export async function joinGroup(req, res) {
     try {
         if (!req.user || !req.user.id) {

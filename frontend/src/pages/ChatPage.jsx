@@ -21,6 +21,7 @@ function ChatPage() {
     const [image, setImage] = useState(null);
     const [preview, setPreview] = useState(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isAddUserModalOpen, setIsAddUserModalOpen] = useState(false);
     const [newGroupName, setNewGroupName] = useState("");
     const [newGroupDesc, setNewGroupDesc] = useState("");
 
@@ -31,7 +32,6 @@ function ChatPage() {
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     }, [messages]);
-
 
     useEffect(() => {
         const fetchData = async () => {
@@ -51,13 +51,11 @@ function ChatPage() {
         fetchData();
     }, [user.id, token]);
 
-
     useEffect(() => {
         if (!selectedChat || !selectedChat.isGroup) return;
         socket.emit("join_group", selectedChat.id);
         return () => socket.emit("leave_group", selectedChat.id);
     }, [selectedChat]);
-
 
     useEffect(() => {
         if (!user.id || !selectedChat) return;
@@ -76,7 +74,6 @@ function ChatPage() {
         fetchMessages();
     }, [user.id, selectedChat, token]);
 
-
     useEffect(() => {
         if (!user.id) return;
         socket.connect();
@@ -94,7 +91,6 @@ function ChatPage() {
                 setMessages(prev => prev.some(m => m.id === msg.id) ? prev : [...prev, { ...msg, sent: Number(msg.senderId) === Number(user.id) }]);
             }
         });
-
 
         socket.on("message_deleted", (deletedId) => {
             setMessages(prev => prev.filter(m => m.id !== deletedId));
@@ -139,7 +135,6 @@ function ChatPage() {
         }
     };
 
-
     const handleDelete = async (messageId) => {
         try {
             const res = await fetch(`${API_URL}/messages/${messageId}`, {
@@ -148,12 +143,10 @@ function ChatPage() {
             });
 
             if (res.ok) {
-
                 socket.emit("delete_message", {
                     messageId,
                     groupId: selectedChat?.isGroup ? selectedChat.id : null
                 });
-
                 setMessages(prev => prev.filter(m => m.id !== messageId));
             }
         } catch (err) {
@@ -181,6 +174,44 @@ function ChatPage() {
         } catch (err) {
             console.error(err);
         }
+    };
+
+    const handleAddUserToGroup = async (userIdToAdd) => {
+        try {
+            const res = await fetch(`${API_URL}/groups/${selectedChat.id}/add`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`
+                },
+                body: JSON.stringify({ userId: userIdToAdd }),
+            });
+
+            if (res.ok) {
+                const groupsRes = await fetch(`${API_URL}/groups/me`, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                const groupsData = await groupsRes.json();
+                setGroups(groupsData);
+
+                const updatedGroup = groupsData.find(g => g.id === selectedChat.id);
+                if (updatedGroup) setSelectedChat({ ...updatedGroup, isGroup: true });
+
+                alert("User added successfully!");
+                setIsAddUserModalOpen(false);
+            } else {
+                const errData = await res.json();
+                alert(errData.message || "Failed to add user");
+            }
+        } catch (err) {
+            console.error("Add user error:", err);
+        }
+    };
+
+    const getAvailableUsers = () => {
+        if (!selectedChat || !selectedChat.isGroup) return [];
+        const memberIds = selectedChat.members?.map(m => m.userId) || [];
+        return users.filter(u => !memberIds.includes(u.id));
     };
 
     return (
@@ -214,6 +245,15 @@ function ChatPage() {
             <div className="chat-area">
                 <div className="chat-header">
                     <h3>{selectedChat ? (selectedChat.isGroup ? `# ${selectedChat.name}` : `Chat with ${selectedChat.username}`) : "Select a conversation"}</h3>
+                    {selectedChat?.isGroup && (
+                        <button
+                            className="add-btn"
+                            style={{width: 'auto', padding: '0 15px', fontSize: '14px', borderRadius: '4px'}}
+                            onClick={() => setIsAddUserModalOpen(true)}
+                        >
+                            + Add Member
+                        </button>
+                    )}
                 </div>
                 <div className="messages">
                     {selectedChat ? messages.map((m, i) => (
@@ -223,8 +263,6 @@ function ChatPage() {
                                 <div className="message-content">
                                     {m.imageUrl && <img src={`${SOCKET_URL}${m.imageUrl}`} className="message-image" alt="uploaded" />}
                                     {m.text && <p>{m.text}</p>}
-
-
                                     {m.sent && (
                                         <button className="delete-btn" onClick={() => handleDelete(m.id)}>x</button>
                                     )}
@@ -264,6 +302,35 @@ function ChatPage() {
                                 <button type="submit">Create</button>
                             </div>
                         </form>
+                    </div>
+                </div>
+            )}
+
+            {isAddUserModalOpen && (
+                <div className="modal-overlay">
+                    <div className="modal">
+                        <h3>Add Member to {selectedChat?.name}</h3>
+                        <div style={{width: '100%', maxHeight: '300px', overflowY: 'auto'}}>
+                            {getAvailableUsers().length > 0 ? (
+                                getAvailableUsers().map(u => (
+                                    <div key={u.id} className="chat-item" style={{justifyContent: 'space-between', borderBottom: '1px solid #374151'}}>
+                                        <span style={{color: 'white'}}>{u.username}</span>
+                                        <button
+                                            className="add-btn"
+                                            style={{width: 'auto', height: '30px', padding: '0 10px', fontSize: '12px'}}
+                                            onClick={() => handleAddUserToGroup(u.id)}
+                                        >
+                                            Add
+                                        </button>
+                                    </div>
+                                ))
+                            ) : (
+                                <p style={{padding: '20px', textAlign: 'center', color: '#94a3b8'}}>All users are already members.</p>
+                            )}
+                        </div>
+                        <div className="modal-actions">
+                            <button type="button" onClick={() => setIsAddUserModalOpen(false)}>Close</button>
+                        </div>
                     </div>
                 </div>
             )}
