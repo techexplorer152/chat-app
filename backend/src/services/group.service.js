@@ -37,7 +37,6 @@ export const findGroupsByUserId = async (userId) => {
     });
 };
 
-
 export const addUserToGroup = async (groupId, userId, role = "member") => {
     return await prisma.groupMember.create({
         data: {
@@ -58,4 +57,29 @@ export const getGroupMembers = async (groupId) => {
             user: { select: { id: true, username: true } }
         }
     });
+};
+
+export const removeUserFromGroup = async (groupId, userId) => {
+    return await prisma.groupMember.delete({
+        where: {
+            userId_groupId: {
+                userId: parseInt(userId),
+                groupId: parseInt(groupId),
+            },
+        },
+    });
+};
+
+export const deleteGroup = async (groupId) => {
+    return await prisma.$transaction([
+        prisma.groupMember.deleteMany({
+            where: { groupId: parseInt(groupId) },
+        }),
+        prisma.message.deleteMany({
+            where: { groupId: parseInt(groupId) },
+        }),
+        prisma.group.delete({
+            where: { id: parseInt(groupId) },
+        }),
+    ]);
 };

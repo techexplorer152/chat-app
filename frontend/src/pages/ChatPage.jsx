@@ -235,7 +235,7 @@ function ChatPage() {
                     {users.map(u => (
                         <div key={`u-${u.id}`} className={`chat-item ${selectedChat?.id === u.id && !selectedChat.isGroup ? "active" : ""}`}
                              onClick={() => setSelectedChat({ ...u, isGroup: false })}>
-                            ● {u.username}
+                             {u.username}
                         </div>
                     ))}
                 </div>

@@ -5,20 +5,16 @@ export async function createGroup(req, res) {
         if (!req.user || !req.user.id) {
             return res.status(401).json({ message: "User not authenticated." });
         }
-
         const { name, description } = req.body;
         if (!name || !name.trim()) {
             return res.status(400).json({ message: "Group name is required." });
         }
-
         const ownerId = parseInt(req.user.id);
-
         const group = await groupService.createGroupAndAddOwner(
             name.trim(),
             description?.trim() || "",
             ownerId
         );
-
         res.status(201).json(group);
     } catch (err) {
         console.error("Create group error:", err);
@@ -31,11 +27,8 @@ export async function getMyGroups(req, res) {
         if (!req.user || !req.user.id) {
             return res.status(401).json({ message: "User not authenticated." });
         }
-
         const userId = parseInt(req.user.id);
-
         const groups = await groupService.findGroupsByUserId(userId);
-
         res.status(200).json(groups);
     } catch (err) {
         console.error("Get my groups error:", err);
@@ -46,17 +39,14 @@ export async function getMyGroups(req, res) {
 export async function addUser(req, res) {
     try {
         const { groupId } = req.params;
-        const { userId } = req.body; 
-
+        const { userId } = req.body;
         if (!groupId || !userId) {
             return res.status(400).json({ message: "Group ID and User ID are required." });
         }
-
         const membership = await groupService.addUserToGroup(
             parseInt(groupId),
             parseInt(userId)
         );
-
         res.status(200).json({ message: "User added successfully", membership });
     } catch (err) {
         console.error("Add user error:", err);
@@ -72,20 +62,39 @@ export async function joinGroup(req, res) {
         if (!req.user || !req.user.id) {
             return res.status(401).json({ message: "User not authenticated." });
         }
-
         const { groupId } = req.params;
         if (!groupId) {
             return res.status(400).json({ message: "Group ID is required." });
         }
-
         const membership = await groupService.addUserToGroup(
             parseInt(groupId),
             parseInt(req.user.id)
         );
-
         res.status(200).json(membership);
     } catch (err) {
         console.error("Join group error:", err);
         res.status(500).json({ message: "Could not join group. You might already be a member.", error: err.message });
+    }
+}
+
+export async function removeMember(req, res) {
+    try {
+        const { groupId, userId } = req.params;
+        await groupService.removeUserFromGroup(groupId, userId);
+        res.status(200).json({ message: "Member removed successfully" });
+    } catch (err) {
+        console.error("Remove member error:", err);
+        res.status(500).json({ message: "Failed to remove member.", error: err.message });
+    }
+}
+
+export async function deleteGroup(req, res) {
+    try {
+        const { groupId } = req.params;
+        await groupService.deleteGroup(groupId);
+        res.status(200).json({ message: "Group and all related data deleted successfully" });
+    } catch (err) {
+        console.error("Delete group error:", err);
+        res.status(500).json({ message: "Failed to delete group.", error: err.message });
     }
 }
