@@ -52,126 +52,108 @@
     transform: translateY(0);
 }
 /*-----------------The Css for group creation----------*/
-
+/* Modal Overlay with Blur */
 .modal-overlay {
     position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, 0.75);
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(4px);
     display: flex;
     justify-content: center;
     align-items: center;
     z-index: 1000;
-    backdrop-filter: blur(3px);
 }
 
+/* Modal Box */
 .modal {
-    background: #1f2a36;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    flex-direction: column;
-    gap: 1rem;
+    background-color: #1a2234;
     width: 100%;
-    max-width: 340px;
-    margin: 16px;
-    padding: 24px 20px;
+    max-width: 450px;
     border-radius: 12px;
-    box-shadow: 0 20px 25px -5px rgba(0,0,0,0.6), 0 10px 10px -5px rgba(0,0,0,0.4);
+    box-shadow: 0 25px 30px -10px rgba(0, 0, 0, 0.6);
+    border: 1px solid #2d3748;
     color: #e2e8f0;
-    font-family: system-ui, -apple-system, sans-serif;
-    transform: scale(0.96);
-    transition: transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
+    font-family: 'Inter', sans-serif;
+    display: flex;
+    flex-direction: column;
 }
 
-
-.modal.show {
-    transform: scale(1);
+/* Modal Title */
+.modal h3 {
+    padding: 20px 24px;
+    font-size: 1.25rem;
+    color: #ffffff;
+    border-bottom: 1px solid #2d3748;
 }
 
+/* Section Headings (MEMBERS, etc.) */
+.modal h4 {
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: #718096;
+    margin: 20px 24px 10px;
+}
 
-.modal::before {
-    display: block;
-    margin: -8px -20px 20px -20px;
-    padding: 16px 20px 12px;
-    background: linear-gradient(to bottom, #2d3b4a, transparent);
-    border-radius: 12px 12px 0 0;
-    font-size: 1.35rem;
-    font-weight: 600;
+/* Scrollable Member List Container */
+.member-item-container {
+    padding: 0 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+/* Individual Row */
+.user-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: #e2e8f0;
+    font-size: 0.95rem;
+}
+
+/* Kick Button - Styled like your screenshot */
+.btn-kick {
+    background-color: #f56565;
     color: white;
-    text-align: center;
-}
-
-
-.modal input,
-.modal textarea {
-    display: block;
-    width: 100%;
-    margin: 0 0 16px;
-    padding: 11px 14px;
-    background: #2d3b4a;
-    border: 1px solid #475569;
-    border-radius: 6px;
-    color: #e2e8f0;
-    font-size: 1rem;
-    transition: border-color 0.15s, box-shadow 0.15s;
-}
-
-.modal input:focus,
-.modal textarea:focus {
-    outline: none;
-    border-color: #3b82f6;
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
-}
-
-.modal input::placeholder,
-.modal textarea::placeholder {
-    color: #94a3b8;
-}
-
-
-.modal button {
-    padding: 10px 18px;
-    margin: 4px;
     border: none;
-    border-radius: 6px;
-    font-size: 0.94rem;
-    font-weight: 500;
+    padding: 5px 15px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    font-weight: 600;
     cursor: pointer;
-    transition: all 0.14s ease;
-    min-width: 88px;
 }
 
-.modal button:first-of-type {
-    background: transparent;
-    color: #94a3b8;
-}
+.btn-kick:hover { background-color: #e53e3e; }
 
-.modal button:first-of-type:hover,
-.modal button:first-of-type:focus {
+/* Delete Channel Button - High Emphasis */
+.btn-delete {
+    margin: 25px 24px;
+    padding: 12px;
+    background-color: #c53030;
     color: white;
-    background: rgba(255, 255, 255, 0.07);
+    border: none;
+    border-radius: 4px;
+    font-weight: 700;
+    cursor: pointer;
 }
 
-.modal button:last-of-type {
-    background: #3b82f6;
+.btn-delete:hover { background-color: #9b2c2c; }
+
+/* Modal Footer Actions */
+.modal-actions {
+    padding: 10px 24px 20px;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.btn-primary {
+    background-color: #f56565;
     color: white;
+    padding: 8px 20px;
+    border-radius: 4px;
+    font-weight: 600;
 }
-
-.modal button:last-of-type:hover,
-.modal button:last-of-type:focus {
-    background: #60a5fa;
-    transform: translateY(-1px);
-}
-
-.modal button:last-of-type:active {
-    transform: translateY(0);
-}
-
-
-.modal button + button {
-    margin-left: 8px;
-}
-
 
 
 /*----------------------------------------------------*/
