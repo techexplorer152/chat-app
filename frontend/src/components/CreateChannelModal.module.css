@@ -1,0 +1,80 @@
+.modalOverlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(4px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal {
+    background-color: #1a2234;
+    width: 100%;
+    max-width: 500px;
+    border-radius: 12px;
+    box-shadow: 0 25px 30px -10px rgba(0, 0, 0, 0.6);
+    border: 1px solid #2d3748;
+    color: #ffffff;
+    font-family: 'Inter', sans-serif;
+    overflow: hidden;
+}
+
+.modalHeader {
+    padding: 24px;
+    font-size: 1.5rem;
+    font-weight: 700;
+    border-bottom: 1px solid #2d3748;
+}
+
+.modalForm {
+    padding: 24px;
+}
+
+.inputGroup {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 24px;
+}
+
+.inputGroup input {
+    flex: 1;
+    padding: 12px;
+    background: #ffffff;
+    border: 1px solid #d1d5db;
+    border-radius: 4px;
+    color: #1a2234;
+    font-size: 0.95rem;
+}
+
+.modalActions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+}
+
+.btnCancel, .btnCreate {
+    padding: 10px 24px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    color: white;
+    font-size: 1rem;
+
+}
+.btnCreate{
+    background-color: #2b77e8;
+
+}
+.btnCancel{
+    background-color: #ff5a5a;
+}
+
+.btnCancel:hover {
+    opacity: 0.9;
+}
+.btnCreate:hover{
+    color: #ffffff;
+}

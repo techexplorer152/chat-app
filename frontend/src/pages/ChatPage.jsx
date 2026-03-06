@@ -2,6 +2,7 @@ import React, { useEffect, useState, useRef } from "react";
 import { io } from "socket.io-client";
 import LogoutButton from "../components/LogoutButton.jsx";
 import GroupSettingsModal from "../components/GroupSettingsModal.jsx";
+import CreateChannelModal from "../components/CreateChannelModal.jsx";
 import "./ChatPage.css";
 
 const currentHost = window.location.hostname;
@@ -294,21 +295,15 @@ function ChatPage() {
                 </div>
             </div>
 
-            {isModalOpen && (
-                <div className="modal-overlay">
-                    <div className="modal">
-                        <h3>Create New Channel</h3>
-                        <form onSubmit={handleCreateGroup}>
-                            <input type="text" placeholder="Channel Name" value={newGroupName} onChange={e => setNewGroupName(e.target.value)} required />
-                            <input type="text" placeholder="Description (Optional)" value={newGroupDesc} onChange={e => setNewGroupDesc(e.target.value)} />
-                            <div className="modal-actions">
-                                <button type="button" onClick={() => setIsModalOpen(false)}>Cancel</button>
-                                <button type="submit">Create</button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            )}
+            <CreateChannelModal
+                isOpen={isModalOpen}
+                onClose={() => setIsModalOpen(false)}
+                newGroupName={newGroupName}
+                setNewGroupName={setNewGroupName}
+                newGroupDesc={newGroupDesc}
+                setNewGroupDesc={setNewGroupDesc}
+                handleCreateGroup={handleCreateGroup}
+            />
 
             <GroupSettingsModal
                 isOpen={isSettingsModalOpen}
