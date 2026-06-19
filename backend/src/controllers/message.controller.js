@@ -9,7 +9,7 @@ import {
 export async function createMessage(req, res) {
     try {
         const { text, sender_id, receiver_id, groupId } = req.body;
-        const imageUrl = req.file ? `/uploads/${req.file.filename}` : null;
+        const imageUrl = req.file ? req.file.path : null;
 
         if (!text && !imageUrl) {
             return res.status(400).json({ error: "Message empty" });
@@ -37,7 +37,7 @@ export async function createMessage(req, res) {
 
         res.status(201).json(message);
     } catch (err) {
-        console.error(err);
+        console.error("Error creating message:", err);
         res.status(500).json({ error: "Server error" });
     }
 }
@@ -57,7 +57,7 @@ export async function getAllMessages(req, res) {
 
         res.status(200).json(messages);
     } catch (err) {
-        console.error(err);
+        console.error("Error getting all messages:", err);
         res.status(500).json({ error: "Failed to fetch" });
     }
 }
@@ -69,7 +69,7 @@ export async function getGroupMessagesController(req, res) {
         const messages = await getGroupMessages(Number(groupId));
         res.status(200).json(messages);
     } catch (err) {
-        console.error(err);
+        console.error("Error getting group messages:", err);
         res.status(500).json({ error: "Failed to fetch group messages" });
     }
 }
@@ -80,7 +80,7 @@ export async function deleteMessage(req, res) {
         res.status(200).json({ message: "Deleted" });
     } catch (err) {
         if (err.code === "P2025") return res.status(404).json({ error: "Not found" });
-        console.error(err);
+        console.error("Error deleting message:", err);
         res.status(500).json({ error: "Delete failed" });
     }
 }

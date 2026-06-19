@@ -276,7 +276,7 @@ function ChatPage() {
                             <div className="message-wrapper">
                                 {!m.sent && <small className="sender-name">{m.sender?.username}</small>}
                                 <div className="message-content">
-                                    {m.imageUrl && <img src={`${SOCKET_URL}${m.imageUrl}`} className="message-image" alt="uploaded" />}
+                                    {m.imageUrl && <img src={m.imageUrl} className="message-image" alt="uploaded" />}
                                     {m.text && <p>{m.text}</p>}
                                     {m.sent && <button className="delete-btn" onClick={() => handleDelete(m.id)}>x</button>}
                                 </div>
