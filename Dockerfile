@@ -12,4 +12,4 @@ RUN DATABASE_URL="postgresql://placeholder:placeholder@localhost:5432/placeholde
 
 EXPOSE 5000
 
-CMD ["node", "src/index.js"]
+CMD ["npm", "start"]
