@@ -5,15 +5,14 @@ import GroupSettingsModal from "../components/GroupSettingsModal.jsx";
 import CreateChannelModal from "../components/CreateChannelModal.jsx";
 import "./ChatPage.css";
 
-const currentHost = window.location.hostname;
-const API_URL = `http://${currentHost}:5000/api`;
-const SOCKET_URL = `http://${currentHost}:5000`;
+const API_URL = import.meta.env.VITE_API_URL || "https://chatappbackend1-a6n8vlg3.b4a.run/api";
+const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || "https://chatappbackend1-a6n8vlg3.b4a.run";
 
 const socket = io(SOCKET_URL, {
     autoConnect: false,
     transports: ["websocket", "polling"],
+    withCredentials: true
 });
-
 function ChatPage() {
     const [users, setUsers] = useState([]);
     const [groups, setGroups] = useState([]);
