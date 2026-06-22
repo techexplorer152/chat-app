@@ -8,7 +8,7 @@ RUN npm install
 
 COPY backend/ .
 
-RUN PRISMA_SKIP_POSTGRES_CHECK=true npx prisma generate --schema=./prisma/schema.prisma
+RUN DATABASE_URL="postgresql://placeholder:placeholder@localhost:5432/placeholder" npx prisma generate --schema=./prisma/schema.prisma
 
 EXPOSE 5000
 
