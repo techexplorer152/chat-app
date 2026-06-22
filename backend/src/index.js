@@ -24,7 +24,8 @@ app.use(
                 origin.startsWith("http://172.") ||
                 origin.startsWith("http://192.") ||
                 origin.startsWith("http://localhost") ||
-                origin.startsWith("http://127.0.0.1")
+                origin.startsWith("http://127.0.0.1") ||
+                origin.startsWith("https://chat-app-two-nu-54.vercel.app")
             ) {
                 callback(null, true);
             } else {
